@@ -23,10 +23,10 @@ def apply_label_encoding(df, cols_to_encode, label_encoders):
 
 
 def main():
-    st.title('Model Prediction App')
-
+  #  st.title('Model Prediction App')
+     print("Initialized main")
     # Sidebar with user inputs
-    st.sidebar.header('Enter Input Data')
+  #  st.sidebar.header('Enter Input Data')
 # Load the encodings from the joblib file
     
 
@@ -55,8 +55,8 @@ new_data = {
     'innings_number': st.sidebar.number_input('Innings Number', min_value=0),
     'description': st.sidebar.selectbox('Description', all_keys['description']),
     'age': st.sidebar.number_input('age', min_value=0),
-    'Avg_Balls_Faced':st.sidebar.number_input('Avg Balls Faced', value=int(selected_player_info['Avg_Balls_Faced']), min_value=0),
-    'Avg_Strike_Rate':st.sidebar.number_input('Avg Strike Rate', value=int(selected_player_info['Avg_Strike_Rate']), min_value=0),
+    'Avg_Balls_Faced':int(selected_player_info['Avg_Balls_Faced']),
+    'Avg_Strike_Rate':int(selected_player_info['Avg_Strike_Rate']), 
     'name': st.sidebar.selectbox('Name', all_keys['name']),
     'position': st.sidebar.selectbox('Position', all_keys['position']),
     'ground_name': st.sidebar.selectbox('Town Name', all_keys['ground_name']),
@@ -78,8 +78,18 @@ prediction = rf_model.predict(user_input_df_encoded)
 rounded_prediction = np.round(prediction[0]).astype(int)
 
 # Display the rounded prediction
-st.write(f'Model Prediction: {rounded_prediction}')
+# st.write(f'Model Prediction: {rounded_prediction}')
+runs, fours, sixes = prediction[0]  # Unpack the values
 
+# Round the values to the nearest whole number
+runs_rounded = round(runs)
+fours_rounded = round(fours)
+sixes_rounded = round(sixes)
+st.title("Cricket Runs Prediction")
+# Print the output
+st.write(f'Number of runs: {runs_rounded}')
+st.write(f'Number of fours: {fours_rounded}')
+st.write(f'Number of sixes: {sixes_rounded}')
 
 if __name__ == '__main__':
     main()

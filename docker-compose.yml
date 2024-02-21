@@ -1,0 +1,11 @@
+version:  "3.7"
+
+services:
+  model-x:
+    container_name: model-x
+    ports:
+      - "8501:8501"
+    build:
+      context: .
+      dockerfile: Dockerfile
+
