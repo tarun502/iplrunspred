@@ -9,6 +9,12 @@ rf_model = joblib.load('multi_output_rf_model_check1.joblib')
 import streamlit as st
 # Create a unique set of player names
 
+
+ # Create mapping dictionaries for dropdowns
+team_abbreviation_to_id = { 'KKR': 4341, 'RCB': 4340, 'RR': 4345,
+                            'SRH': 5143, 'MI': 4346, 'CSK': 4343, 'DC': 4344,
+                            'GT': 6904, 'LSG': 6903, 'PBKS': 4342}
+
 # Define the columns to be label encoded
 columns_to_encode = ['floodlit_name', 'team1_abbreviation', 'team2_abbreviation',
        'weather_location_code', 'description', 'name',
@@ -44,9 +50,9 @@ selected_player_info = df[df['name'] == selected_name].iloc[0]
 
 # Create input boxes for each feature in new_data
 new_data = {
-    'away_team_id': st.sidebar.number_input('Away Team ID', min_value=0),
+    'away_team_id': list(team_abbreviation_to_id.keys()),
     'floodlit_name': st.sidebar.selectbox('Floodlit Name', all_keys['floodlit_name']),
-    'home_team_id': st.sidebar.number_input('Home Team ID', min_value=0),
+    'home_team_id': list(team_abbreviation_to_id.keys()),
     'team1_abbreviation': st.sidebar.selectbox('Team 1 Abbreviation', all_keys['team1_abbreviation']),
     'team2_abbreviation': st.sidebar.selectbox('Team 2 Abbreviation', all_keys['team2_abbreviation']),
     'weather_location_code': st.sidebar.selectbox('weather code', all_keys['weather_location_code']),
@@ -54,7 +60,7 @@ new_data = {
     'batting_position': st.sidebar.number_input('Batting Position', min_value=0),
     'innings_number': st.sidebar.number_input('Innings Number', min_value=0),
     'description': st.sidebar.selectbox('Description', all_keys['description']),
-    'age': st.sidebar.number_input('age', min_value=0),
+    'age': st.sidebar.number_input('age',value=int(selected_player_info['age']), min_value=0),
     'Avg_Balls_Faced':int(selected_player_info['Avg_Balls_Faced']),
     'Avg_Strike_Rate':int(selected_player_info['Avg_Strike_Rate']), 
     'name': st.sidebar.selectbox('Name', all_keys['name']),
