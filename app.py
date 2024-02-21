@@ -5,7 +5,7 @@ import numpy as np
 df= pd.read_csv('notencoded.csv', index_col=0)
 # Load the label encoders and pipeline from joblib files
 label_encoders = joblib.load('label_encoder_mappings__check1.joblib')
-rf_model = joblib.load('multi_output_rf_moden_check1.joblib')
+rf_model = joblib.load('multi_output_rf_model_check1.joblib')
 import streamlit as st
 # Create a unique set of player names
 
