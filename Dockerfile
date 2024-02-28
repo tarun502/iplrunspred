@@ -3,5 +3,5 @@ COPY . /app
 WORKDIR /app
 RUN pip install -r requirements.txt
 EXPOSE $PORT
-CMD ["streamlit", "run", "--server.enableCORS=false", "--server.enableXsrfProtection=false", "--server.enableWebsocketCompression=false", "app.py"]
+CMD ["streamlit", "run", "app.py"]
 
