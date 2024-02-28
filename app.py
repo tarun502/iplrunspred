@@ -3,7 +3,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from sklearn.metrics import mean_absolute_error
-
+import os
 df= pd.read_csv('mainalldatafinalll.csv', index_col=0,low_memory=False)
 # Load the label encoders and pipeline from joblib files
 label_encoders = joblib.load('label_encoders_main123_check.joblib')
@@ -59,20 +59,27 @@ def filter_player_names(input_csv_path, player_names, output_csv_path="name_filt
     - output_csv_path (str): Path where the filtered CSV file will be saved.
     """
     # Read the input CSV file
+    print(f"Method Called {colname} amd Input: {input_csv_path} For {output_csv_path}")
     default_df = pd.read_csv(input_csv_path)
     if colname != "name":
         first_row = pd.read_csv(input_csv_path, nrows=1)
-        exclude_indices = [8, 9,10]  # Indices of columns to exclude (8th, 9th, and 10th columns)
+        print(f"Row: {first_row}")
+        column_names = default_df.columns.tolist()
+        print(f"Inputs: input csv {input_csv_path}, cols: {colname} output_csv:{output_csv_path} Column Names: {column_names}")
+        exclude_indices = [0,1,9,10,11]  # Indices of columns to exclude (8th, 9th, and 10th columns)
         total_columns = len(first_row.columns)
         use_columns = [i for i in range(total_columns) if i not in exclude_indices]
         filtered_default = default_df[default_df[colname].isin(player_names)]
         df = pd.read_csv(input_csv_path,usecols=use_columns) 
+        df = df[df[colname].isin(player_names)]
+
         # df.to_csv(output_csv_path, index=False)
     else:
         df = pd.read_csv(input_csv_path)
+        df = df[df[colname].isin(player_names)]
 
     # Filter the DataFrame based on the 'name' column
-    df = df[df[colname].isin(player_names)]
+    
     filtered_default = default_df[default_df[colname].isin(player_names)]
     
     df.to_csv(output_csv_path, index=False)
@@ -85,12 +92,23 @@ def filter_player_names(input_csv_path, player_names, output_csv_path="name_filt
 def main():
     # st.title('Model Prediction App')
     print("Compiling model")
-    filter_player_names("2023data.csv",player_names,"name_filtered.csv","name")
-    filter_player_names("name_filtered.csv",ground_name,"ground_filtered.csv","ground_name",10)
+    files_path = ['ground_filtered.csv','Input_data.csv','name_filtered.csv','testing_input.csv']
+    # Create each file in the list
+    for file_path in files_path:
+        with open(file_path, 'w') as file:
+            file.write('Hello, world!')  # Example content
+        print(f"File created at {file_path}")
+    # Now, delete each file in the list
+    for file_path in files_path:
+        if os.path.exists(file_path):
+            os.remove(file_path)
+            print(f"The file {file_path} has been deleted.")
+        else:
+            print(f"The file {file_path} does not exist.")
 
-    # # Sidebar with user inputs
-    # st.sidebar.header('Enter Input Data')
-# Load the encodings from the joblib file
+        # # Sidebar with user inputs
+        # st.sidebar.header('Enter Input Data')
+    # Load the encodings from the joblib file
     
 
 
@@ -168,8 +186,8 @@ st.write(f'Number of sixes: {sixes_rounded}')
 st.title('CSV File Uploader and Prediction Display')
 
 def colorize(row):
-    colors = ['','']  # Start with an empty string for the 'Row Index' column if it's part of the row
-    for actual, predicted in zip(row[2::2], row[3::2]):  # Adjust the slicing to skip 'Row Index' and 'Name'
+    colors = ['','','','']  # Start with an empty string for the 'Row Index' column if it's part of the row
+    for actual, predicted in zip(row[4::2], row[5::2]):  # Start from the 5th element to skip 'Row Index', 'Name', and two other columns
         difference = abs(actual - predicted)
         if difference <= 5:
             color = 'background-color: green'
@@ -189,14 +207,19 @@ if uploaded_file is not None:
     # use_columns = [i for i in range(total_columns) if i not in exclude_indices]
     # print(f"Length of total_columns {total_columns}")
     # # print(f"Length of input_df {use_columns}")
+    player_names = ['AB de Villiers', 'Aaron Finch', 'Abhijeet Tomar', 'Abhinav Manohar', 'Abhishek Sharma', 'Adam Milne', 'Aiden Markram', 'Ajinkya Rahane', 'Akshdeep Nath', 'Alex Hales', 'Alzarri Joseph', 'Aman Hakim Khan', 'Ambati Rayudu', 'Amit Mishra', 'Andre Russell', 'Andrew Tye', 'Ankit Rajpoot', 'Anmolpreet Singh', 'Anrich Nortje', 'Anuj Rawat', 'Anukul Roy', 'Anureet Singh', 'Arshdeep Singh', 'Ashton Turner', 'Avesh Khan', 'Axar Patel', 'Ayush Badoni', 'Baba Indrajith', 'Basil Thampi', 'Ben Cutting', 'Ben Laughlin', 'Ben Stokes', 'Bhanuka Rajapaksa', 'Bhuvneshwar Kumar', 'Billy Stanlake', 'Carlos Brathwaite', 'Chetan Sakariya', 'Chris Gayle', 'Chris Jordan', 'Chris Lynn', 'Chris Morris', 'Chris Woakes', 'Colin Ingram', 'Colin Munro', 'Colin de Grandhomme', 'Corey Anderson', "D'Arcy Short", 'Dale Steyn', 'Dan Christian', 'Daniel Sams', 'Darshan Nalkande', 'Daryl Mitchell', 'David Miller', 'David Warner', 'David Willey', 'Dawid Malan', 'Deepak Chahar', 'Deepak Hooda', 'Devdutt Padikkal', 'Devon Conway', 'Dewald Brevis', 'Dhawal Kulkarni', 'Dinesh Karthik', 'Dushmantha Chameera', 'Dwaine Pretorius', 'Dwayne Bravo', 'Eoin Morgan', 'Evin Lewis', 'Fabian Allen', 'Faf du Plessis', 'Fazalhaq Farooqi', 'Gautam Gambhir', 'Glenn Maxwell', 'Gurkeerat Singh Mann', 'Hanuma Vihari', 'Harbhajan Singh', 'Hardik Pandya', 'Hardus Viljoen', 'Harry Gurney', 'Harshal Patel', 'Heinrich Klaasen', 'Hrithik Shokeen', 'Imran Tahir', 'Ish Sodhi', 'Ishan Kishan', 'Ishant Sharma', 'Jagadeesha Suchith', 'James Neesham', 'Jason Behrendorff', 'Jason Holder', 'Jason Roy', 'Jasprit Bumrah', 'Jayant Yadav', 'Jaydev Unadkat', 'Jean-Paul Duminy', 'Jhye Richardson', 'Jitesh Sharma', 'Joe Denly', 'Jofra Archer', 'Jonny Bairstow', 'Jos Buttler', 'Josh Hazlewood', 'Junior Dala', 'KC Cariappa', 'KL Rahul', 'Kagiso Rabada', 'Kamlesh Nagarkoti', 'Kane Richardson', 'Kane Williamson', 'Karn Sharma', 'Kartik Tyagi', 'Karun Nair', 'Kedar Jadhav', 'Keemo Paul', 'Khaleel Ahmed', 'Kieron Pollard', 'Krishnappa Gowtham', 'Krunal Pandya', 'Kuldeep Sen', 'Kuldeep Yadav', 'Kyle Jamieson', 'Lasith Malinga', 'Liam Plunkett', 'Lockie Ferguson', 'Lungi Ngidi', 'M Shahrukh Khan', 'MS Dhoni', 'Maheesh Theekshana', 'Mahipal Lomror', 'Manan Vohra', 'Mandeep Singh', 'Manish Pandey', 'Manoj Tiwary', 'Marco Jansen', 'Marcus Stoinis', 'Mark Wood', 'Martin Guptill', 'Matheesha Pathirana', 'Matthew Wade', 'Mayank Agarwal', 'Mayank Markande', 'Mitchell Johnson', 'Mitchell Marsh', 'Mitchell McClenaghan', 'Mitchell Santner', 'Moeen Ali', 'Mohammad Nabi', 'Mohammed Shami', 'Mohammed Siraj', 'Mohit Sharma', 'Moises Henriques', 'Mujeeb Ur Rahman', 'Murali Vijay', 'Murugan Ashwin', 'Mustafizur Rahman', 'Naman Ojha', 'Narayan Jagadeesan', 'Nathan Coulter-Nile', 'Nathan Ellis', 'Navdeep Saini', 'Nicholas Pooran', 'Obed McCoy', 'Odean Smith', 'Oshane Thomas', 'Parthiv Patel', 'Pat Cummins', 'Piyush Chawla', 'Pradeep Sangwan', 'Prashant Chopra', 'Prasidh Krishna', 'Prayas Ray Barman', 'Prerak Mankad', 'Prithvi Raj', 'Prithvi Shaw', 'Priyam Garg', 'Quinton de Kock', 'Rahul Chahar', 'Rahul Tewatia', 'Rahul Tripathi', 'Rajat Patidar', 'Raj\xa0Bawa', 'Rashid Khan', 'Rassie van der Dussen', 'Ravi Bishnoi', 'Ravichandran Ashwin', 'Ravindra Jadeja', 'Ricky Bhui', 'Riley Meredith', 'Rinku Singh', 'Rishabh Pant', 'Rishi Dhawan', 'Riyan Parag', 'Robin Uthappa', 'Rohit Sharma', 'Romario Shepherd', 'Rovman Powell', 'Ruturaj Gaikwad', 'Sai Kishore', 'Sai Sudharsan', 'Sam Billings', 'Sam Curran', 'Sandeep Lamichhane', 'Sandeep Sharma', 'Sandeep Warrier', 'Sanjay Yadav', 'Sanju Samson', 'Sarfaraz Khan', 'Scott Kuggeleijn', 'Sean Abbott', 'Shahbaz Ahmed', 'Shahbaz Nadeem', 'Shakib Al Hasan', 'Shane Watson', 'Shardul Thakur', 'Sheldon Jackson', 'Sherfane Rutherford', 'Shikhar Dhawan', 'Shimron Hetmyer', 'Shivam Dube', 'Shivam Mavi', 'Shreevats Goswami', 'Shreyas Gopal', 'Shubman Gill', 'Siddarth Kaul', 'Srikar Bharat', 'Steven Smith', 'Stuart Binny', 'Sunil Narine', 'Suresh Raina', 'T Natarajan', 'Tilak Varma', 'Tim David', 'Tim Seifert', 'Tim Southee', 'Tom Curran', 'Trent Boult', 'Tristan Stubbs', 'Tushar Deshpande', 'Tymal Mills', 'Umesh Yadav', 'Umran Malik', 'Varun Aaron', 'Varun Chakravarthy', 'Venkatesh Iyer', 'Vijay Shankar', 'Vinay Kumar', 'Virat Kohli', 'Virat Singh', 'Wanindu Hasaranga', 'Washington Sundar', 'Wriddhiman Saha', 'Yash Dayal', 'Yashasvi Jaiswal', 'Yusuf Pathan', 'Yuvraj Singh', 'Yuzvendra Chahal']
+    ground_name = ['Andhra Cricket Association-Visakhapatnam District Cricket Association Stadium, Visakhapatnam', 'Arun Jaitley Stadium, Delhi', 'Brabourne Stadium, Mumbai', 'Dr DY Patil Sports Academy, Mumbai', 'Eden Gardens, Kolkata', 'Feroz Shah Kotla, Delhi', 'Holkar Cricket Stadium, Indore', 'M Chinnaswamy Stadium, Bangalore', 'M Chinnaswamy Stadium, Bengaluru', 'MA Chidambaram Stadium, Chepauk, Chennai', 'Maharashtra Cricket Association Stadium, Pune', 'Narendra Modi Stadium, Ahmedabad', 'Punjab Cricket Association IS Bindra Stadium, Mohali, Chandigarh', 'Rajiv Gandhi International Stadium, Uppal, Hyderabad', 'Sawai Mansingh Stadium, Jaipur', 'Wankhede Stadium, Mumbai']
 
-    input_df = pd.read_csv("ground_filtered.csv",index_col=0)
-
-   
+    input_df = pd.read_csv(uploaded_file,index_col=0)
+    input_df.to_csv("Input_data.csv",index=False)
+    filter_player_names("Input_data.csv",player_names,"name_filtered.csv","name")
+    filter_player_names("name_filtered.csv",ground_name,"ground_filtered.csv","ground_name",10)
+    created_csv = pd.read_csv("ground_filtered.csv")
     not_excluded = pd.read_csv("testing_input.csv")
     if st.button('Predict'):
         # Apply label encoding to the input DataFrame
-        input_df_encoded = apply_label_encoding(input_df.copy(), columns_to_encode, label_encoders)
+        print(f"Inputs: {columns_to_encode} label_encoders: {label_encoders}")
+        input_df_encoded = apply_label_encoding(created_csv.copy(), columns_to_encode, label_encoders)
 
         # Make predictions
         predictions = rf_model.predict(input_df_encoded)
@@ -204,7 +227,9 @@ if uploaded_file is not None:
         # Create a DataFrame for displaying predictions and actual values
         predictions_df = pd.DataFrame(predictions, columns=['Predicted Runs', 'Predicted Fours', 'Predicted Sixes'])
         display_df = pd.DataFrame({
-            'Row Index': input_df.index,
+            'Row Index': created_csv.index,
+            'CricInfo ID': not_excluded['cricinfo_id'],
+            'Start Time': not_excluded['start_time'],
             'Name' : not_excluded['name'],
             'Actual Runs': not_excluded['runs'],
             'Predicted Runs': predictions_df['Predicted Runs'],
