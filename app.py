@@ -6,11 +6,11 @@ from sklearn.metrics import mean_absolute_error
 import os
 df= pd.read_csv('mainalldatafinalll.csv', index_col=0,low_memory=False)
 # Load the label encoders and pipeline from joblib files
-label_encoders = joblib.load('label_encoders_main123_check.joblib')
-rf_model = joblib.load('multi_output_rf_model__check123__check.joblib')
+label_encoders = joblib.load('vscode_label_encoder.joblib')
+rf_model = joblib.load('vscode_prediction_model.joblib')
 import streamlit as st
 # Create a unique set of player names
-
+import striputils
  # Create mapping dictionaries for dropdowns
 team_abbreviation_to_id = { 'KKR': 4341, 'RCB': 4340, 'RR': 4345,
                             'SRH': 5143, 'MI': 4346, 'CSK': 4343, 'DC': 4344,
@@ -66,7 +66,7 @@ def filter_player_names(input_csv_path, player_names, output_csv_path="name_filt
         print(f"Row: {first_row}")
         column_names = default_df.columns.tolist()
         print(f"Inputs: input csv {input_csv_path}, cols: {colname} output_csv:{output_csv_path} Column Names: {column_names}")
-        exclude_indices = [0,1,9,10,11]  # Indices of columns to exclude (8th, 9th, and 10th columns)
+        exclude_indices = [0,1,9,10,11,12]  # Indices of columns to exclude (8th, 9th, and 10th columns)
         total_columns = len(first_row.columns)
         use_columns = [i for i in range(total_columns) if i not in exclude_indices]
         filtered_default = default_df[default_df[colname].isin(player_names)]
@@ -184,17 +184,23 @@ st.write(f'Number of sixes: {sixes_rounded}')
 # st.write(f'Model Prediction: {rounded_prediction}')
 
 st.title('CSV File Uploader and Prediction Display')
+def hide_zero_values(val):
+    # If the value is an empty string or None, return a CSS attribute to hide the text
+    return 'display: none' if val == 0 or val is None else ''
 
 def colorize(row):
-    colors = ['','','','']  # Start with an empty string for the 'Row Index' column if it's part of the row
-    for actual, predicted in zip(row[4::2], row[5::2]):  # Start from the 5th element to skip 'Row Index', 'Name', and two other columns
-        difference = abs(actual - predicted)
-        if difference <= 5:
-            color = 'background-color: green'
-        elif 5 < difference <= 15:
-            color = 'background-color: orange'
+    colors = ['','','','','']  # Start with an empty string for the 'Row Index' column if it's part of the row
+    for actual, predicted in zip(row[5::2], row[6::2]):  # Start from the 5th element to skip 'Row Index', 'Name', and two other columns
+        if actual == 0 and predicted == 0:
+            color = 'background-color: #ccc'  # Set color to lime green if both actual and predicted are zero
         else:
-            color = 'background-color: red'
+            difference = abs(actual - predicted)
+            if difference <= 5:
+                color = 'background-color: green'
+            elif 5 < difference <= 15:
+                color = 'background-color: orange'
+            else:
+                color = 'background-color: red'
         colors.extend([color, color])  # Apply the same color to both actual and predicted cells
     return colors
 
@@ -207,45 +213,56 @@ if uploaded_file is not None:
     # use_columns = [i for i in range(total_columns) if i not in exclude_indices]
     # print(f"Length of total_columns {total_columns}")
     # # print(f"Length of input_df {use_columns}")
+    st.title('Enter a Year')
+# Create a number input widget for year input
+    year = st.number_input('Enter a year', min_value=1, step=1, format='%d')
     player_names = ['AB de Villiers', 'Aaron Finch', 'Abhijeet Tomar', 'Abhinav Manohar', 'Abhishek Sharma', 'Adam Milne', 'Aiden Markram', 'Ajinkya Rahane', 'Akshdeep Nath', 'Alex Hales', 'Alzarri Joseph', 'Aman Hakim Khan', 'Ambati Rayudu', 'Amit Mishra', 'Andre Russell', 'Andrew Tye', 'Ankit Rajpoot', 'Anmolpreet Singh', 'Anrich Nortje', 'Anuj Rawat', 'Anukul Roy', 'Anureet Singh', 'Arshdeep Singh', 'Ashton Turner', 'Avesh Khan', 'Axar Patel', 'Ayush Badoni', 'Baba Indrajith', 'Basil Thampi', 'Ben Cutting', 'Ben Laughlin', 'Ben Stokes', 'Bhanuka Rajapaksa', 'Bhuvneshwar Kumar', 'Billy Stanlake', 'Carlos Brathwaite', 'Chetan Sakariya', 'Chris Gayle', 'Chris Jordan', 'Chris Lynn', 'Chris Morris', 'Chris Woakes', 'Colin Ingram', 'Colin Munro', 'Colin de Grandhomme', 'Corey Anderson', "D'Arcy Short", 'Dale Steyn', 'Dan Christian', 'Daniel Sams', 'Darshan Nalkande', 'Daryl Mitchell', 'David Miller', 'David Warner', 'David Willey', 'Dawid Malan', 'Deepak Chahar', 'Deepak Hooda', 'Devdutt Padikkal', 'Devon Conway', 'Dewald Brevis', 'Dhawal Kulkarni', 'Dinesh Karthik', 'Dushmantha Chameera', 'Dwaine Pretorius', 'Dwayne Bravo', 'Eoin Morgan', 'Evin Lewis', 'Fabian Allen', 'Faf du Plessis', 'Fazalhaq Farooqi', 'Gautam Gambhir', 'Glenn Maxwell', 'Gurkeerat Singh Mann', 'Hanuma Vihari', 'Harbhajan Singh', 'Hardik Pandya', 'Hardus Viljoen', 'Harry Gurney', 'Harshal Patel', 'Heinrich Klaasen', 'Hrithik Shokeen', 'Imran Tahir', 'Ish Sodhi', 'Ishan Kishan', 'Ishant Sharma', 'Jagadeesha Suchith', 'James Neesham', 'Jason Behrendorff', 'Jason Holder', 'Jason Roy', 'Jasprit Bumrah', 'Jayant Yadav', 'Jaydev Unadkat', 'Jean-Paul Duminy', 'Jhye Richardson', 'Jitesh Sharma', 'Joe Denly', 'Jofra Archer', 'Jonny Bairstow', 'Jos Buttler', 'Josh Hazlewood', 'Junior Dala', 'KC Cariappa', 'KL Rahul', 'Kagiso Rabada', 'Kamlesh Nagarkoti', 'Kane Richardson', 'Kane Williamson', 'Karn Sharma', 'Kartik Tyagi', 'Karun Nair', 'Kedar Jadhav', 'Keemo Paul', 'Khaleel Ahmed', 'Kieron Pollard', 'Krishnappa Gowtham', 'Krunal Pandya', 'Kuldeep Sen', 'Kuldeep Yadav', 'Kyle Jamieson', 'Lasith Malinga', 'Liam Plunkett', 'Lockie Ferguson', 'Lungi Ngidi', 'M Shahrukh Khan', 'MS Dhoni', 'Maheesh Theekshana', 'Mahipal Lomror', 'Manan Vohra', 'Mandeep Singh', 'Manish Pandey', 'Manoj Tiwary', 'Marco Jansen', 'Marcus Stoinis', 'Mark Wood', 'Martin Guptill', 'Matheesha Pathirana', 'Matthew Wade', 'Mayank Agarwal', 'Mayank Markande', 'Mitchell Johnson', 'Mitchell Marsh', 'Mitchell McClenaghan', 'Mitchell Santner', 'Moeen Ali', 'Mohammad Nabi', 'Mohammed Shami', 'Mohammed Siraj', 'Mohit Sharma', 'Moises Henriques', 'Mujeeb Ur Rahman', 'Murali Vijay', 'Murugan Ashwin', 'Mustafizur Rahman', 'Naman Ojha', 'Narayan Jagadeesan', 'Nathan Coulter-Nile', 'Nathan Ellis', 'Navdeep Saini', 'Nicholas Pooran', 'Obed McCoy', 'Odean Smith', 'Oshane Thomas', 'Parthiv Patel', 'Pat Cummins', 'Piyush Chawla', 'Pradeep Sangwan', 'Prashant Chopra', 'Prasidh Krishna', 'Prayas Ray Barman', 'Prerak Mankad', 'Prithvi Raj', 'Prithvi Shaw', 'Priyam Garg', 'Quinton de Kock', 'Rahul Chahar', 'Rahul Tewatia', 'Rahul Tripathi', 'Rajat Patidar', 'Raj\xa0Bawa', 'Rashid Khan', 'Rassie van der Dussen', 'Ravi Bishnoi', 'Ravichandran Ashwin', 'Ravindra Jadeja', 'Ricky Bhui', 'Riley Meredith', 'Rinku Singh', 'Rishabh Pant', 'Rishi Dhawan', 'Riyan Parag', 'Robin Uthappa', 'Rohit Sharma', 'Romario Shepherd', 'Rovman Powell', 'Ruturaj Gaikwad', 'Sai Kishore', 'Sai Sudharsan', 'Sam Billings', 'Sam Curran', 'Sandeep Lamichhane', 'Sandeep Sharma', 'Sandeep Warrier', 'Sanjay Yadav', 'Sanju Samson', 'Sarfaraz Khan', 'Scott Kuggeleijn', 'Sean Abbott', 'Shahbaz Ahmed', 'Shahbaz Nadeem', 'Shakib Al Hasan', 'Shane Watson', 'Shardul Thakur', 'Sheldon Jackson', 'Sherfane Rutherford', 'Shikhar Dhawan', 'Shimron Hetmyer', 'Shivam Dube', 'Shivam Mavi', 'Shreevats Goswami', 'Shreyas Gopal', 'Shubman Gill', 'Siddarth Kaul', 'Srikar Bharat', 'Steven Smith', 'Stuart Binny', 'Sunil Narine', 'Suresh Raina', 'T Natarajan', 'Tilak Varma', 'Tim David', 'Tim Seifert', 'Tim Southee', 'Tom Curran', 'Trent Boult', 'Tristan Stubbs', 'Tushar Deshpande', 'Tymal Mills', 'Umesh Yadav', 'Umran Malik', 'Varun Aaron', 'Varun Chakravarthy', 'Venkatesh Iyer', 'Vijay Shankar', 'Vinay Kumar', 'Virat Kohli', 'Virat Singh', 'Wanindu Hasaranga', 'Washington Sundar', 'Wriddhiman Saha', 'Yash Dayal', 'Yashasvi Jaiswal', 'Yusuf Pathan', 'Yuvraj Singh', 'Yuzvendra Chahal']
     ground_name = ['Andhra Cricket Association-Visakhapatnam District Cricket Association Stadium, Visakhapatnam', 'Arun Jaitley Stadium, Delhi', 'Brabourne Stadium, Mumbai', 'Dr DY Patil Sports Academy, Mumbai', 'Eden Gardens, Kolkata', 'Feroz Shah Kotla, Delhi', 'Holkar Cricket Stadium, Indore', 'M Chinnaswamy Stadium, Bangalore', 'M Chinnaswamy Stadium, Bengaluru', 'MA Chidambaram Stadium, Chepauk, Chennai', 'Maharashtra Cricket Association Stadium, Pune', 'Narendra Modi Stadium, Ahmedabad', 'Punjab Cricket Association IS Bindra Stadium, Mohali, Chandigarh', 'Rajiv Gandhi International Stadium, Uppal, Hyderabad', 'Sawai Mansingh Stadium, Jaipur', 'Wankhede Stadium, Mumbai']
 
     input_df = pd.read_csv(uploaded_file,index_col=0)
+    input_df = striputils.stripFile(input_df,year)
     input_df.to_csv("Input_data.csv",index=False)
     filter_player_names("Input_data.csv",player_names,"name_filtered.csv","name")
     filter_player_names("name_filtered.csv",ground_name,"ground_filtered.csv","ground_name",10)
     created_csv = pd.read_csv("ground_filtered.csv")
     not_excluded = pd.read_csv("testing_input.csv")
+    print(f"Shape of Excluded: {not_excluded.columns}")
     if st.button('Predict'):
         # Apply label encoding to the input DataFrame
         print(f"Inputs: {columns_to_encode} label_encoders: {label_encoders}")
         input_df_encoded = apply_label_encoding(created_csv.copy(), columns_to_encode, label_encoders)
 
         # Make predictions
-        predictions = rf_model.predict(input_df_encoded)
-        
-        # Create a DataFrame for displaying predictions and actual values
-        predictions_df = pd.DataFrame(predictions, columns=['Predicted Runs', 'Predicted Fours', 'Predicted Sixes'])
-        display_df = pd.DataFrame({
-            'Row Index': created_csv.index,
-            'CricInfo ID': not_excluded['cricinfo_id'],
-            'Start Time': not_excluded['start_time'],
-            'Name' : not_excluded['name'],
-            'Actual Runs': not_excluded['runs'],
-            'Predicted Runs': predictions_df['Predicted Runs'],
-            'Actual Fours': not_excluded['fours'],
-            'Predicted Fours': predictions_df['Predicted Fours'],
-            'Actual Sixes': not_excluded['sixes'],
-            'Predicted Sixes': predictions_df['Predicted Sixes'],
+        try:
+            predictions = rf_model.predict(input_df_encoded)
+            
+            # Create a DataFrame for displaying predictions and actual values
+            predictions_df = pd.DataFrame(predictions, columns=['Predicted Runs', 'Predicted Fours', 'Predicted Sixes'])
+            display_df = pd.DataFrame({
+                'Row Index': created_csv.index,
+                'CricInfo ID': not_excluded['cricinfo_id'],
+                'Start Time': not_excluded['start_time'],
+                'Name' : not_excluded['name'],
+                'Balls Faced':not_excluded['balls_faced'],
+                'Actual Runs': not_excluded['runs'],
+                'Predicted Runs': predictions_df['Predicted Runs'],
+                'Actual Fours': not_excluded['fours'],
+                'Predicted Fours': predictions_df['Predicted Fours'],
+                'Actual Sixes': not_excluded['sixes'],
+                'Predicted Sixes': predictions_df['Predicted Sixes'],
 
-        })
 
-        st.write('## Predictions')
-        styled_df = display_df.style.apply(colorize, axis=1)
-        st.write('## Predictions with Conditional Formatting')
-        st.dataframe(styled_df)
-        calculate_and_display_mae(display_df)
-        
+            })
+
+            st.write('## Predictions')
+            display_df = display_df.sort_values(by='CricInfo ID')
+            styled_df = display_df.style.applymap(hide_zero_values)
+            styled_df = display_df.style.apply(colorize, axis=1)
+            st.write('## Predictions with Conditional Formatting')
+            st.dataframe(styled_df)
+            calculate_and_display_mae(display_df)
+        except ValueError as e:
+            st.title(f"File Upload Error {ValueError}")
     else:
         st.write("Upload a CSV file to get started.")
 
